@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "gas"
+version = "0.1.0"
+description = "Guided Agentic Systems (GAS) is a framework that integrates Large Language Models (LLMs) as active participants in human-driven processes."
+authors = ["OilProducts <christopher.l.charland@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+paramiko = "^3.4.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

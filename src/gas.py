@@ -18,6 +18,10 @@ navbar = dmc.AppShellNavbar(
             href="/roles",
         ),
         dmc.NavLink(
+            label="Events",
+            href="/events",
+        ),
+        dmc.NavLink(
             label="Conversation",
             href="/conversation",
         )

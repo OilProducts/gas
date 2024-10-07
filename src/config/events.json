@@ -1,0 +1,19 @@
+{
+  "Sprint Planning": {
+    "description": "Sprint planning session for development team.",
+    "participants": [
+      "Developer",
+      "Lead Developer",
+      "Product Owner",
+      "Scrum Master"
+    ]
+  },
+  "Daily Standup": {
+    "description": "Daily scrum standup, using the three questions:\nWhat did you do yesterday?\nWhat do you plan on doing today?\nDo you have any blockers?",
+    "participants": [
+      "Developer",
+      "Lead Developer",
+      "Scrum Master"
+    ]
+  }
+}

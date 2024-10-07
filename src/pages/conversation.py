@@ -6,8 +6,10 @@ from dash import dcc, html, callback
 from dash.dependencies import Input, Output, State
 import dash_mantine_components as dmc
 
-from events import Event
-import roles
+print(__name__)
+
+#from .events import Event
+from utils.agent_load import agents
 
 dash.register_page(__name__)
 
@@ -17,7 +19,6 @@ event = None
 # Participants (adjust as needed)
 participants = ['Product Owner', 'Scrum Master', 'Lead Developer', 'Developer One', 'Developer Two']
 
-# app = dash.Dash(__name__)
 
 # Model settings
 model_name = 'llama3.1:8b-instruct-q8_0'
