@@ -19,7 +19,7 @@ def load_agents():
             role=role_name,
             system_message=config.get('system_message', ''),
             is_human=config.get('is_human', False),
-            model_endpoint=config.get('model_endpoint', 'http://localhost:11434/api/generate'),
+            model_endpoint=config.get('model_endpoint', 'http://127.0.0.1:11434/api/generate'),
             tools=config.get('tools', [])
         )
         agents[role_name] = agent

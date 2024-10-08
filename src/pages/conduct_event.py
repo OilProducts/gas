@@ -14,7 +14,7 @@ from utils.event_load import load_events
 # from gas.prompt_manager import PromptManager
 # from gas.worker import Worker
 
-dash.register_page(__name__)
+dash.register_page(__name__, path='/conduct_event')
 
 # Global variables to store the event and conversation history
 event = None
@@ -51,7 +51,7 @@ layout = dmc.Container([
             style={'width': '80%'},
         ),
         dmc.Button('Send', id='send-button', n_clicks=0),
-    ], position='center'),
+    ], justify='center'),
     dcc.Interval(
         id='interval-component',
         interval=1000,  # Update every second
@@ -61,7 +61,7 @@ layout = dmc.Container([
 
 # Callback to start the event
 @callback(
-    Output('conversation-thread', 'children'),
+    Output('conversation-thread', 'children', allow_duplicate=True),
     Output('start-event-button', 'disabled'),
     Input('start-event-button', 'n_clicks'),
     State('event-selector', 'value'),
@@ -112,10 +112,11 @@ def initialize_event(event_name):
 def handle_user_input(n_clicks, user_input):
     if n_clicks > 0 and user_input:
         global event, conversation_history
+        print(event)
         if event is None:
             return conversation_history, ''
         # Assume the first human participant is the user
-        human_participant = next((p for p in event['participants'] if p['is_human']), None)
+        human_participant = next((p for p in event['participants'] if p.is_human), None)
         if not human_participant:
             # If no human participant is defined, treat the user as an external input
             sender = 'User'
@@ -144,7 +145,6 @@ def process_agent_responses():
         return
     # Get the latest conversation context
     context = '\n'.join([f"{entry['sender']}: {entry['message']}" for entry in conversation_history])
-
     for agent in event['participants']:
         if agent.is_human:
             continue  # Skip human participants
@@ -154,6 +154,10 @@ def process_agent_responses():
         if should_respond:
             # Generate response
             response = agent.generate_response(context)
+            # Add the agents response to the observations of all agents present
+            for p in event['participants']:
+                if p.role != role:
+                    p.prompt_manager.add_observed_message(role, response)
             # Add agent's response to conversation history
             conversation_history.append({
                 'sender': role,
@@ -169,6 +173,14 @@ def process_agent_responses():
                 'timestamp': datetime.datetime.now().isoformat(),
                 'internal_thought': thought_process
             })
+
+        # Write conversation history to project file
+        project_file = f'./config/projects.json'
+        if os.path.exists(project_file):
+            with open(project_file, 'w') as f:
+                projects = json.load(f)
+            projects['Project Alpha']['events']['Sprint Planning']['conversation_history'] = (
+                conversation_history)
 
 
 # Callback to update the conversation thread periodically
@@ -191,14 +203,14 @@ def format_conversation(conversation_history):
         timestamp = entry.get('timestamp', '')
         if message:
             content = [
-                dmc.Text(f"{sender}:", weight=700),
-                dmc.Text(message),
-                dmc.Text(f"Thoughts: {internal_thought}", size='sm', color='gray')
+                dmc.Text(f"{sender}:"),
+                dcc.Markdown(message),
+                dcc.Markdown(f"Thoughts: {internal_thought}", style={'color': 'grey'})
             ]
         else:
             content = [
                 dmc.Text(f"{sender} decided not to respond.", style={'color': 'grey'}),
-                dmc.Text(f"Thoughts: {internal_thought}", size='sm', color='gray')
+                dcc.Markdown(f"Thoughts: {internal_thought}", style={'color': 'grey'})
             ]
         message_div = dmc.Paper(
             content,

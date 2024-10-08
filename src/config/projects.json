@@ -1,0 +1,51 @@
+{
+  "Project Alpha": {
+    "project_name": "Project Alpha",
+    "description": "Description of Project Alpha",
+    "participants": [
+      "Developer",
+      "Lead Developer",
+      "Product Owner",
+      "Scrum Master"
+    ],
+    "events": {
+      "Sprint Planning": {
+        "name": "Sprint Planning",
+        "description": "Sprint planning session for development team.",
+        "participants": [
+          "Developer",
+          "Lead Developer",
+          "Product Owner",
+          "Scrum Master"
+        ],
+        "conversation_history": []
+      },
+      "Daily Standup": "Daily Standup"
+    }
+  },
+  "Project Beta": {
+    "project_name": "Project Beta",
+    "description": "Description of Project Beta",
+    "participants": [
+      "Developer",
+      "Lead Developer",
+      "Product Owner",
+      "Scrum Master"
+    ],
+    "events": {
+      "Sprint Planning": {
+        "name": "Sprint Planning",
+        "description": "Sprint planning session for development team.",
+        "participants": [
+          "Developer",
+          "Lead Developer",
+          "Product Owner",
+          "Scrum Master"
+        ],
+        "conversation_history": []
+      },
+      "Daily Standup": "Daily Standup"
+    }
+  }
+}
+

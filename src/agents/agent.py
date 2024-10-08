@@ -13,7 +13,7 @@ class Agent:
                  role="Unconfigured Agent",
                  system_message="",
                  is_human=False,
-                 model_endpoint="http://localhost:11434/api/generate",
+                 model_endpoint="http://127.0.0.1:11434/api/generate",
                  tools=None):
         self.model_name = model_name
         self.model_endpoint = model_endpoint
@@ -87,12 +87,13 @@ class Agent:
             "model": self.model_name,
             "prompt": prompt,
             "options": {
-                "temperature": 0.7,
+                "temperature": 0.8,
                 "top_p": 0.9,
                 "num_predict": 1500  # Adjust as needed
             },
             "stream": False
         }
+        print(f"Payload: {payload}")
 
         try:
             response = requests.post(self.model_endpoint, json=payload)
@@ -103,6 +104,9 @@ class Agent:
         except requests.exceptions.RequestException as e:
             self.log.error(f"Request failed: {e}")
             raise AgentError(f"Request failed: {e}")
+
+    def add_observed_message(self, role, message):
+        self.prompt_manager.add_observed_message(role, message)
 
     # You can remove or adjust these methods as per your implementation
     def save_context(self):
