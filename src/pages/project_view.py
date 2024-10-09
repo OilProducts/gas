@@ -29,7 +29,10 @@ def layout(project_name=None):
         # ),
 
         dmc.Group([
-            dmc.Button('Add Event', id='add-event-button', n_clicks=0),
+            dmc.Button('Add Event',
+                       id='add-event-button',
+                       href=f"/project/{project_name}/add_event",
+                       n_clicks=0),
         ]),
         dmc.Space(h=20),
         dcc.Store(id='project-name-store', data=project_name),
@@ -44,13 +47,12 @@ def layout(project_name=None):
     Input('project-name-store', 'data'),
 )
 def load_events_from_project(project_name):
-    project_file = './templates/projects.json'
+    project_file = f'./data/projects/{project_name}/project.json'
     if os.path.exists(project_file):
         with open(project_file, 'r') as f:
-            projects = json.load(f)
-        project = projects[project_name]
-        project_events = {e for e in project['events']}
-        return project['events']
+            project = json.load(f)
+        # project_events = {e for e in project['events']}
+        return project.get('events', {})
     return {}
 
 @callback(
@@ -60,8 +62,7 @@ def load_events_from_project(project_name):
 def update_event_tabs(events):
     if events:
         tabs = [
-            dmc.TabsTab(event_name, value=event_name) for event_name, event in
-            events.items()
+            dmc.TabsTab(event_name, value=event_name) for event_name, event in events.items()
         ]
         return [
             dmc.TabsList(children=tabs),

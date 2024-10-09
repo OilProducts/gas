@@ -1,0 +1,6 @@
+[metadata]
+name = "Sprint Planning"
+description = """Sprint planning session for development team.  The team will discuss the current \
+                backlog and plan the next sprint."""
+participants = ["Developer", "Scrum Master", "Lead Developer", "Product Owner", "Writer"]
+

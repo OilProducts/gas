@@ -1,0 +1,4 @@
+[metadata]
+project_name = "Project Name"
+description = "Description of Project"
+participants = ["Developer", "Lead Developer", "Product Owner", "Scrum Master"]

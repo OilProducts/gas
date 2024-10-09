@@ -8,9 +8,8 @@ import os
 dash.register_page(__name__, path="/add_project")
 
 def layout():
-    print(f'{__file__}layout')
     return dmc.Container([
-        # dcc.Location(id='redirect', refresh=True),
+        dcc.Location(id='redirect', refresh=True),
         dmc.Title("Add New Project", order=2),
         dmc.Space(h=20),
         dmc.TextInput(
@@ -35,6 +34,7 @@ def layout():
     Output('add-project-confirmation', 'children'),
     Output('project-name-input', 'value'),
     Output('project-description-input', 'value'),
+    Output('app-shell-navbar', 'data'),
     Input('add-project-button', 'n_clicks'),
     State('project-name-input', 'value'),
     State('project-description-input', 'value'),
@@ -42,23 +42,23 @@ def layout():
 )
 def add_new_project(n_clicks, project_name, project_description):
     if n_clicks and project_name:
-        projects_file = './templates/projects.json'
-        projects = []
-        if os.path.exists(projects_file):
-            with open(projects_file, 'r') as f:
-                projects = json.load(f)
-        # Check if the project already exists
-        if any(p['name'] == project_name for p in projects):
-            return f"Project '{project_name}' already exists.", dash.no_update, dash.no_update
-        # Add the new project
-        projects.append({
-            "name": project_name,
-            "description": project_description or ''
-        })
-        with open(projects_file, 'w') as f:
-            json.dump(projects, f, indent=2)
-        return f"Project '{project_name}' added successfully.", '', ''
-    return '', dash.no_update, dash.no_update
+        projects_dir = './data/projects'
+
+        # Create the projects directory if it does not exist
+        os.mkdir(projects_dir) if not os.path.exists(projects_dir) else None
+
+        # Create a directory for the new project
+        project_dir = os.path.join(projects_dir, project_name)
+        os.mkdir(project_dir)
+        project_events_dir = os.path.join(project_dir, 'events')
+        os.mkdir(project_events_dir)
+
+        with open(os.path.join(project_dir, 'project.json'), 'w') as f:
+            json.dump({
+                "project_name": project_name,
+                "description": project_description or ''
+            }, f, indent=2)
+        return f"Project '{project_name}' added successfully.", '', '', ''
 
 
 @callback(

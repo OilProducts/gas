@@ -1,0 +1,15 @@
+[metadata]
+model = "llama8b"
+role = "Agent role"
+description = "Agent template"
+tags = ["tag1", "tag2"]
+agent_spec_version = "0.1.0"
+agent_version = "0.1.0"
+
+
+[persona]
+name = "Agents name"  # Name of the agent, alice, bob, etc.
+description = "Agents description"  # Description of the agent (e.g. "Is a competent developer")
+
+[capabilities]
+tools = ["tool1", "tool2"]  # List of tools the agent can use by name.  Tools are defined elsewhere

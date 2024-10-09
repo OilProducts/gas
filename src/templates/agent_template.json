@@ -1,0 +1,24 @@
+{
+  "metadata": {
+    "name": "agent-template",
+    "description": "Agent template",
+    "tags": [
+      "tag1",
+      "tag2"
+    ],
+    "agent_spec_version": "1.0.0",
+    "agent_version": "1.0.0"
+  },
+  "persona": {
+    "name": "agent",
+    "description": "Agent persona",
+    "tags": [
+      "tag1",
+      "tag2"
+    ]
+  },
+  "spec": {
+  }
+}
+
+
