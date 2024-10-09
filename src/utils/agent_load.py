@@ -4,7 +4,7 @@ import os
 from agents.agent import Agent
 
 def load_agents():
-    AGENTS_CONFIG_FILE = './config/agents.json'
+    AGENTS_CONFIG_FILE = './templates/agents.json'
     if not os.path.exists(AGENTS_CONFIG_FILE):
         print("Agents configuration file not found.")
         return {}

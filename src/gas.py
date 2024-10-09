@@ -12,7 +12,7 @@ _dash_renderer._set_react_version("18.2.0")
 app = dash.Dash(__name__, use_pages=True, suppress_callback_exceptions=True)
 
 def load_projects():
-    with open('./config/projects.json', 'r') as f:
+    with open('templates/projects.json', 'r') as f:
         projects = json.load(f)
     return projects
 
@@ -34,12 +34,13 @@ def create_navbar():
             leftSection=[DashIconify(icon="ic:baseline-plus", width=16, height=16)]
         )
     )
+    print(project_links)
 
     navbar = dmc.AppShellNavbar(
         children=[
             dmc.NavLink(
-                label="Roles",
-                href="/roles",
+                label="Agent Templates",
+                href="/agent_templates",
                 leftSection=[DashIconify(icon="mdi:user-add-outline", width=16, height=16)]
             ),
             dmc.NavLink(

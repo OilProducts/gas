@@ -42,7 +42,7 @@ def layout(project_name=None):
 )
 def add_event(n_clicks, event_name, event_description, project_name):
     if n_clicks and event_name and project_name:
-        events_file = './config/events.json'
+        events_file = './templates/events.json'
         events = []
         if os.path.exists(events_file):
             with open(events_file, 'r') as f:

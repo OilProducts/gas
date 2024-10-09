@@ -8,8 +8,9 @@ import os
 dash.register_page(__name__, path="/add_project")
 
 def layout():
+    print(f'{__file__}layout')
     return dmc.Container([
-        dcc.Location(id='redirect', refresh=True),
+        # dcc.Location(id='redirect', refresh=True),
         dmc.Title("Add New Project", order=2),
         dmc.Space(h=20),
         dmc.TextInput(
@@ -26,7 +27,7 @@ def layout():
         dmc.Space(h=20),
         dmc.Group([
             dmc.Button('Add Project', id='add-project-button'),
-            dmc.Text(id='add-project-confirmation', color='green'),
+            dmc.Text(id='add-project-confirmation',),
         ]),
     ])
 
@@ -39,9 +40,9 @@ def layout():
     State('project-description-input', 'value'),
     prevent_initial_call=True
 )
-def add_project(n_clicks, project_name, project_description):
+def add_new_project(n_clicks, project_name, project_description):
     if n_clicks and project_name:
-        projects_file = './config/projects.json'
+        projects_file = './templates/projects.json'
         projects = []
         if os.path.exists(projects_file):
             with open(projects_file, 'r') as f:

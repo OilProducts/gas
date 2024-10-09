@@ -7,9 +7,13 @@ import dash_mantine_components as dmc
 import json
 import os
 
+# import pages.conduct_event
+
 dash.register_page(__name__, path_template="/project/<project_name>")
 
 def layout(project_name=None):
+    print(f'{__file__}layout')
+
     project_name = urllib.parse.unquote(project_name)
     return dmc.Container([
         dmc.Title(f"Project: {project_name}", order=2),
@@ -40,7 +44,7 @@ def layout(project_name=None):
     Input('project-name-store', 'data'),
 )
 def load_events_from_project(project_name):
-    project_file = './config/projects.json'
+    project_file = './templates/projects.json'
     if os.path.exists(project_file):
         with open(project_file, 'r') as f:
             projects = json.load(f)

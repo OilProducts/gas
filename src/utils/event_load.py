@@ -3,7 +3,7 @@ import json
 import os
 
 def load_events():
-    EVENTS_CONFIG_FILE = './config/events.json'
+    EVENTS_CONFIG_FILE = './templates/events.json'
     if not os.path.exists(EVENTS_CONFIG_FILE):
         print("Events configuration file not found.")
         return {}
