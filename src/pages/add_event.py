@@ -5,7 +5,7 @@ import dash_mantine_components as dmc
 import json
 import os
 
-dash.register_page(__name__, path_template="/project/<project_name>/add_event")
+# dash.register_page(__name__, path_template="/project/<project_name>/add_event")
 
 def layout(project_name=None):
     return dmc.Container([

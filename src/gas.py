@@ -18,27 +18,40 @@ def load_projects():
     """Load the projects from the data/projects directory"""
     projects = []
     p = Path('data/projects')
+    if not p.exists():
+        os.mkdir(p)
     project_dirs = [x for x in p.iterdir() if x.is_dir()]
     for dir in project_dirs:
-        with open(os.path.join(dir, 'project.json'), 'r') as f:
-            projects.append(json.load(f))
-    return {project['project_name']: project for project in projects}
+        projects.append(dir.name)
+    return projects
+    #     with open(os.path.join(dir, 'project.json'), 'r') as f:
+    #         projects.append(json.load(f))
+    # return {project['project_name']: project for project in projects}
+
 
 
 @callback(
     Output('app-shell-navbar', 'children'),
-    Input('navbar-content-store', 'data')
+    Input('navbar-projects-store', 'data')
 )
 def create_navbar(navbar_content):
     print(navbar_content)
-    projects = load_projects()
-
-    project_links = [
-        dmc.NavLink(
-            label=project['project_name'],
-            href=f"/project/{project['project_name']}",
-        ) for project_name, project in projects.items()
-    ]
+    if navbar_content:
+        project_links = [
+            dmc.NavLink(
+                label=project,
+                href=f"/project/{project}",
+            ) for project in navbar_content
+        ]
+    # else:
+    #     projects = load_projects()
+    #
+    #     project_links = [
+    #         dmc.NavLink(
+    #             label=project['project_name'],
+    #             href=f"/project/{project['project_name']}",
+    #         ) for project_name, project in projects.items()
+    #     ]
 
     # Add a link to add a new project
     project_links.append(
@@ -72,13 +85,13 @@ app.layout = dmc.MantineProvider([
     dmc.AppShell(
         children=[
             dmc.AppShellHeader("GAS"),
-            dmc.AppShellNavbar(id='app-shell-navbar', children=create_navbar('')),
+            dmc.AppShellNavbar(id='app-shell-navbar', children=create_navbar(load_projects())),
             dmc.AppShellMain(dash.page_container,
                              id='page-content'),
         ],
         header={'height': 60},
     ),
-    dcc.Store(id='navbar-content-store', data=''),
+    dcc.Store(id='navbar-projects-store', data=load_projects()),
 ])
 
 if __name__ == '__main__':

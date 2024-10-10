@@ -7,6 +7,7 @@ import os
 
 dash.register_page(__name__, path="/add_project")
 
+
 def layout():
     return dmc.Container([
         dcc.Location(id='redirect', refresh=True),
@@ -17,35 +18,38 @@ def layout():
             label='Project Name',
             placeholder='Enter project name',
             required=True,
+            value='New Project',
         ),
         dmc.Textarea(
             id='project-description-input',
             label='Project Description',
             placeholder='Enter project description',
+            value='This is a new project.',
         ),
         dmc.Space(h=20),
         dmc.Group([
             dmc.Button('Add Project', id='add-project-button'),
-            dmc.Text(id='add-project-confirmation',),
+            dmc.Text(id='add-project-confirmation', ),
         ]),
     ])
+
 
 @callback(
     Output('add-project-confirmation', 'children'),
     Output('project-name-input', 'value'),
     Output('project-description-input', 'value'),
-    Output('app-shell-navbar', 'data'),
+    Output('navbar-projects-store', 'data'),
     Input('add-project-button', 'n_clicks'),
     State('project-name-input', 'value'),
     State('project-description-input', 'value'),
+    State('navbar-projects-store', 'data'),
     prevent_initial_call=True
 )
-def add_new_project(n_clicks, project_name, project_description):
+def add_new_project(n_clicks, project_name, project_description, navbar_projects):
     if n_clicks and project_name:
         projects_dir = './data/projects'
-
-        # Create the projects directory if it does not exist
-        os.mkdir(projects_dir) if not os.path.exists(projects_dir) else None
+        if not os.path.exists(projects_dir):
+            os.mkdir(projects_dir)
 
         # Create a directory for the new project
         project_dir = os.path.join(projects_dir, project_name)
@@ -58,7 +62,11 @@ def add_new_project(n_clicks, project_name, project_description):
                 "project_name": project_name,
                 "description": project_description or ''
             }, f, indent=2)
-        return f"Project '{project_name}' added successfully.", '', '', ''
+        print('returning from add_new_project')
+        navbar_projects.append(project_name)
+        return (f"Project {project_name} added successfully.", 'project_name_input',
+                ['ok'])
+    return '', '', '', navbar_projects
 
 
 @callback(
@@ -70,4 +78,4 @@ def add_new_project(n_clicks, project_name, project_description):
 def redirect_after_add(n_clicks, project_name):
     if n_clicks and project_name:
         return '/'
-    return dash.no_update
+    return '/'
