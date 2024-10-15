@@ -48,6 +48,7 @@ class PromptManager:
                 prompt += f"{role_token}\n{content}"
             else:
                 prompt += f"{role_token}\n\n{content}{self.special_tokens['eot']}"
+        print(prompt)
         return prompt
 
     def reset(self):
