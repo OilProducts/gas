@@ -2,6 +2,76 @@ import os
 
 import core
 
+# In the main function
+project_manager = core.ProjectManager()
+
+scrum_master_tools = {
+    "create_user_story": {
+        "description": "Creates a new user story and returns its unique ID.",
+        "args": {
+            "user_story": "str"
+        },
+        "function": project_manager.create_user_story
+    },
+    "read_user_story": {
+        "description": "Reads a user story identified by user_story_id.",
+        "args": {
+            "user_story_id": "int"
+        },
+        "function": project_manager.read_user_story
+    },
+    "update_user_story": {
+        "description": "Updates an existing user story identified by user_story_id.",
+        "args": {
+            "user_story_id": "int",
+            "user_story": "str"
+        },
+        "function": project_manager.update_user_story
+    },
+    "delete_user_story": {
+        "description": "Deletes a user story identified by user_story_id.",
+        "args": {
+            "user_story_id": "int"
+        },
+        "function": project_manager.delete_user_story
+    },
+    "create_subtask": {
+        "description": "Creates a new subtask under a user story and returns its unique ID.",
+        "args": {
+            "user_story_id": "int",
+            "subtask": "str"
+        },
+        "function": project_manager.create_subtask
+    },
+    "read_subtask": {
+        "description": "Reads a subtask identified by user_story_id and subtask_id.",
+        "args": {
+            "user_story_id": "int",
+            "subtask_id": "int"
+        },
+        "function": project_manager.read_subtask
+    },
+    "update_subtask": {
+        "description": "Updates an existing subtask identified by user_story_id and subtask_id.",
+        "args": {
+            "user_story_id": "int",
+            "subtask_id": "int",
+            "subtask": "str"
+        },
+        "function": project_manager.update_subtask
+    },
+    "delete_subtask": {
+        "description": "Deletes a subtask identified by user_story_id and subtask_id.",
+        "args": {
+            "user_story_id": "int",
+            "subtask_id": "int"
+        },
+        "function": project_manager.delete_subtask
+    }
+}
+
+
+
 developer_system_message = ("You are a skilled developer in the team. Collaborate effectively "
                             "with team members and focus on delivering high-quality increments. "
                             "During meetings you are an effective communicator and provide "
@@ -16,7 +86,9 @@ scrum_master_system_message = ("You are the Scrum Master for the team. You are r
                                "self-organize and make decisions, and you work to remove any "
                                "impediments that are hindering the team's progress. You are a "
                                "servant leader, focused on helping the team to achieve its goals "
-                               "and continuously improve.")
+                               "and continuously improve. You are also responsible for "
+                               "recognizing when a meeting should be ended and ensuring that "
+                               "the team stays on track and focused during meetings.")
 
 product_owner_system_message = ("You are the Product Owner for the team. You are responsible for "
                                 "defining the product vision and prioritizing the product backlog. "
@@ -32,10 +104,25 @@ product_owner_system_message = ("You are the Product Owner for the team. You are
 sprint_planning_system_message = ("This sprint we will be working on creating a remote "
                                   "administration tool.  This will be a simple tool that will "
                                   "support 'get', 'put', and 'execute' operations on remote "
-                                  "machines.  The tool should be able to handle multiple "
-                                  "connections and provide a simple command-line interface for "
-                                  "users to interact with the remote machines.  The remote end "
-                                  "will be written in C, and the client will be written in Python. ")
+                                  "machines.  The tool does not need to handle multiple "
+                                  "connections.  It should provide a simple command-line interface "
+                                  "for users to interact with the remote machines.  The remote end "
+                                  "will be written in C, and the client will be written in "
+                                  "Python.  We will stick to the python standard library for the "
+                                  "client and the C standard library (with posix) for the server.  We will"
+                                  "need to define the protocol for communication between the client "
+                                  "and server.  We will also need to define the error handling "
+                                  "strategy for the tool.  The tool should be able to handle "
+                                  "network errors, file errors, and errors related to the remote "
+                                  "machine.  We will need to define the error codes and messages "
+                                  "that the tool will return to the user in case of an error.  We "
+                                  "will also need to define the logging strategy for the tool.  The "
+                                  "tool should log all interactions with the remote machine, as well "
+                                  "as any errors that occur.  The logs should be stored in a "
+                                  "directory on the local machine, python standard library "
+                                  "default logging should suffice.  The connections do not need "
+                                  "to be encrypted.  Lets start by generating some user stories "
+                                  "that we can sub task off of.")
 
 log_dir = 'logs'
 
@@ -43,22 +130,23 @@ def main():
     if not os.path.exists(log_dir):
         os.mkdir(log_dir)
 
-    developer = core.Agent('llama3.1:8b-instruct-q8_0',
+    developer = core.Agent('llama3.1:70b-instruct-q4_K_M',
                            'Developer',
                            developer_system_message,
-                           model_endpoint="http://192.168.1.137:11434/api/generate")
-    scrum_master = core.Agent('llama3.1:8b-instruct-q8_0',
+                           model_endpoint="http://127.0.0.1:11434/api/generate")
+    scrum_master = core.Agent('llama3.1:70b-instruct-q4_K_M',
                               'Scrum Master',
                               scrum_master_system_message,
-                              model_endpoint="http://192.168.1.137:11434/api/generate")
-    product_owner = core.Agent('llama3.1:8b-instruct-q8_0',
+                              model_endpoint="http://127.0.0.1:11434/api/generate",
+                              tools=scrum_master_tools)
+    product_owner = core.Agent('llama3.1:70b-instruct-q4_K_M',
                                'Product Owner',
                                product_owner_system_message,
-                               model_endpoint="http://192.168.1.137:11434/api/generate")
+                               model_endpoint="http://127.0.0.1:11434/api/generate")
     for agent in [developer, scrum_master]:
         agent.add_observed_message('product_owner', sprint_planning_system_message)
     rounds = 0
-    while rounds < 5:
+    while rounds < 3:
         for agent in [developer, scrum_master, product_owner]:
             if agent.should_respond():
                 response = agent.generate_response()
