@@ -14,7 +14,8 @@ class Agent:
                  system_message="",
                  is_human=False,
                  model_endpoint="http://127.0.0.1:11434/api/generate",
-                 tools=None):
+                 tools=None,
+                 log_dir='logs'):
         self.model_name = model_name
         self.model_endpoint = model_endpoint
         self.role = role
@@ -28,6 +29,7 @@ class Agent:
             system_content=self.system_message,
             tools=self.tools
         )
+        self.log_file = f"{log_dir}/{role}.json"
 
     def should_respond(self):
         """
@@ -50,7 +52,7 @@ class Agent:
         # Prompt the model
         response_text = self.prompt_model(prompt)
         self.log.debug(f"{self.role} thoughts: {response_text}")
-        self.prompt_manager.add_observed_message(f'{self.role}_thoughts', response_text)
+        self.add_observed_message(f'{self.role}_thoughts', response_text)
 
 
         # Extract the decision
@@ -77,7 +79,7 @@ class Agent:
         self.log.debug(f"{self.role} response: {response_text}")
 
         # Add the assistant's response to the conversation history
-        self.prompt_manager.add_observed_message(f'{self.role}', response_text)
+        self.add_observed_message(f'{self.role}', response_text)
 
         return response_text
 
@@ -105,10 +107,23 @@ class Agent:
             return response_text.strip()
         except requests.exceptions.RequestException as e:
             self.log.error(f"Request failed: {e}")
-            raise AgentError(f"Request failed: {e}")
+            # raise AgentError(f"Request failed: {e}")
 
     def add_observed_message(self, role, message):
         self.prompt_manager.add_observed_message(role, message)
+
+        # load json message history and append new message
+        with open(self.log_file, 'w+') as f:
+            try:
+                messages = json.load(f)
+            except json.JSONDecodeError:
+                print('No messages found')
+                messages = []
+            messages.append({
+                'role': role,
+                'message': message
+            })
+            f.write(json.dumps(messages))
 
     # You can remove or adjust these methods as per your implementation
     def save_context(self):

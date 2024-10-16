@@ -65,7 +65,7 @@ def add_new_project(n_clicks, project_name, project_description, navbar_projects
         print('returning from add_new_project')
         navbar_projects.append(project_name)
         return (f"Project {project_name} added successfully.", 'project_name_input',
-                ['ok'])
+                'project_description_input', navbar_projects)
     return '', '', '', navbar_projects
 
 

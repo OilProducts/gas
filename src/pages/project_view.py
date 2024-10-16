@@ -7,7 +7,7 @@ import dash_mantine_components as dmc
 import json
 import os
 
-from .add_event import layout as add_event_layout
+#from .add_event import layout as add_event_layout
 
 dash.register_page(__name__, path_template="/project/<project_name>")
 
@@ -18,25 +18,15 @@ def layout(project_name=None):
     return dmc.Container([
         dmc.Title(f"Project: {project_name}", order=2),
         dmc.Space(h=20),
-        # dmc.Tabs(
-        #     id='events-tabs',
-        #     active_tab='events',
-        #     children=[
-        #         dmc.TabsList([
-        #             dmc.TabsTab(label='Events', value='events'),
-        #         ]),
-        #     ],
-        # ),
-
-        dmc.Group([
-            dmc.Button('Add Event',
-                       id='add-event-button',
-                       n_clicks=0),
-        ]),
+        # dmc.Group([
+        #     dmc.Button('Add Event',
+        #                id='add-event-button',
+        #                n_clicks=0),
+        # ]),
         dmc.Space(h=20),
         dcc.Store(id='project-name-store', data=project_name),
         dcc.Store(id='events-store'),
-        dmc.Tabs(None, id='events-tabs'),
+        dmc.Tabs(None, id='events-tabs', value='Add Event'),
         dmc.Space(h=20),
         html.Div(id='event-content'),
     ])
@@ -59,24 +49,27 @@ def load_events_from_project(project_name):
     Input('events-store', 'data'),
 )
 def update_event_tabs(events):
+    print(f'update_event_tabs: {events}')
     if events:
         tabs = [
             dmc.TabsTab(event_name, value=event_name) for event_name, event in events.items()
         ]
-        return [
-            dmc.TabsList(children=tabs),
-        ]
     else:
-        return [html.Div("No events found. Please add an event.")]
+        tabs = []
+
+    tabs.append(dmc.TabsTab('Add Event', value='Add Event'))
+    print(f'tabs: {tabs}')
+
+    return dmc.TabsList(children=tabs),
 
 @callback(
-    Output('event-content', 'children', allow_duplicate=True),
+    Output('event-content', 'children'),
     Input('events-tabs', 'value'),
     State('events-store', 'data'),
     State('project-name-store', 'data'),
-    prevent_initial_call=True
 )
 def display_event_content(selected_event, events, project_name):
+    print(f'display_event_content selected_event: {selected_event}')
     if selected_event == 'Add Event':
         return dmc.Container([
             dmc.Title(f"Add Event to {project_name}", order=2),
@@ -143,7 +136,7 @@ def add_event_to_project(n_clicks, project_name):
 @callback(
     Output('add-event-confirmation', 'children'),
     Output('event-name-input', 'value'),
-    Output('event-description-input', 'value'),
+    Output('event-description-input', 'value', allow_duplicate=True),
     Output('events-store', 'data', allow_duplicate=True),
     Input('add-event-button', 'n_clicks'),
     State('event-name-input', 'value'),

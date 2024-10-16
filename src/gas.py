@@ -43,15 +43,7 @@ def create_navbar(navbar_content):
                 href=f"/project/{project}",
             ) for project in navbar_content
         ]
-    # else:
-    #     projects = load_projects()
-    #
-    #     project_links = [
-    #         dmc.NavLink(
-    #             label=project['project_name'],
-    #             href=f"/project/{project['project_name']}",
-    #         ) for project_name, project in projects.items()
-    #     ]
+
 
     # Add a link to add a new project
     project_links.append(
