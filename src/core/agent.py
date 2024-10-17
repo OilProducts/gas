@@ -88,9 +88,9 @@ class Agent:
             self.add_observed_message(f'{self.role}', acknowledgment)
             return acknowledgment
 
-    def should_respond(self):
+    def retain_floor(self):
         """
-        Determines if the agent should respond and captures their thought process.
+        Determines if the agent should retain the floor and captures their thought process.
         """
         # Update the conversation history in PromptManager
         # self.prompt_manager.add_observed_message('user', context)
@@ -101,7 +101,8 @@ class Agent:
 
         # Add decision-making instruction
         decision_instruction = (
-            f"Considering the above conversation, should I, as the {self.role}, respond at this point? "
+            f"Considering the above conversation, should I, as the {self.role}, take action ("
+            f"either a response, or call a tool, etc.) or provide a decision at this point? "
             "Provide a short summary of your reasoning and conclude with 'Decision: Yes' or 'Decision: No'."
         )
         prompt += decision_instruction
@@ -120,6 +121,20 @@ class Agent:
             decision = 'no'
         print(f"{self.role} decision: {decision}")
         return decision == 'yes', response_text
+    
+    def take_turn(self, context):
+        """
+        Takes a single turn, which may be multiple rounds of thought and response generation.
+        """
+        while True:
+            retain, thought_process = self.retain_floor()
+            if retain:
+                response = self.generate_response()
+                self.add_observed_message(f'{self.role}', response)
+                return response
+            else:
+                # Add the thought process to the conversation history
+                self.add_observed_message(f'{self.role}', thought_process)
 
     def generate_response(self):
         """

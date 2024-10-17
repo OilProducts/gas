@@ -1,74 +1,78 @@
 import os
-
+from datetime import datetime
 import core
 
-# In the main function
-project_manager = core.ProjectManager()
+# set a unique log directory for each execution based on HH:MM:SS timestamp
+base_log_dir = 'logs'
+log_dir = os.path.join(base_log_dir, f'{datetime.now().strftime("%H:%M:%S")}')
 
-scrum_master_tools = {
-    "create_user_story": {
-        "description": "Creates a new user story and returns its unique ID.",
-        "args": {
-            "user_story": "str"
-        },
-        "function": project_manager.create_user_story
-    },
-    "read_user_story": {
-        "description": "Reads a user story identified by user_story_id.",
-        "args": {
-            "user_story_id": "int"
-        },
-        "function": project_manager.read_user_story
-    },
-    "update_user_story": {
-        "description": "Updates an existing user story identified by user_story_id.",
-        "args": {
-            "user_story_id": "int",
-            "user_story": "str"
-        },
-        "function": project_manager.update_user_story
-    },
-    "delete_user_story": {
-        "description": "Deletes a user story identified by user_story_id.",
-        "args": {
-            "user_story_id": "int"
-        },
-        "function": project_manager.delete_user_story
-    },
-    "create_subtask": {
-        "description": "Creates a new subtask under a user story and returns its unique ID.",
-        "args": {
-            "user_story_id": "int",
-            "subtask": "str"
-        },
-        "function": project_manager.create_subtask
-    },
-    "read_subtask": {
-        "description": "Reads a subtask identified by user_story_id and subtask_id.",
-        "args": {
-            "user_story_id": "int",
-            "subtask_id": "int"
-        },
-        "function": project_manager.read_subtask
-    },
-    "update_subtask": {
-        "description": "Updates an existing subtask identified by user_story_id and subtask_id.",
-        "args": {
-            "user_story_id": "int",
-            "subtask_id": "int",
-            "subtask": "str"
-        },
-        "function": project_manager.update_subtask
-    },
-    "delete_subtask": {
-        "description": "Deletes a subtask identified by user_story_id and subtask_id.",
-        "args": {
-            "user_story_id": "int",
-            "subtask_id": "int"
-        },
-        "function": project_manager.delete_subtask
-    }
-}
+# In the main function
+scrum_master_tools = core.ScrumMasterTools(log_dir='logs')
+
+# scrum_master_tools = {
+#     "create_user_story": {
+#         "description": "Creates a new user story and returns its unique ID.",
+#         "args": {
+#             "user_story": "str"
+#         },
+#         "function": project_manager.create_user_story
+#     },
+#     "read_user_story": {
+#         "description": "Reads a user story identified by user_story_id.",
+#         "args": {
+#             "user_story_id": "int"
+#         },
+#         "function": project_manager.read_user_story
+#     },
+#     "update_user_story": {
+#         "description": "Updates an existing user story identified by user_story_id.",
+#         "args": {
+#             "user_story_id": "int",
+#             "user_story": "str"
+#         },
+#         "function": project_manager.update_user_story
+#     },
+#     "delete_user_story": {
+#         "description": "Deletes a user story identified by user_story_id.",
+#         "args": {
+#             "user_story_id": "int"
+#         },
+#         "function": project_manager.delete_user_story
+#     },
+#     "create_subtask": {
+#         "description": "Creates a new subtask under a user story and returns its unique ID.",
+#         "args": {
+#             "user_story_id": "int",
+#             "subtask": "str"
+#         },
+#         "function": project_manager.create_subtask
+#     },
+#     "read_subtask": {
+#         "description": "Reads a subtask identified by user_story_id and subtask_id.",
+#         "args": {
+#             "user_story_id": "int",
+#             "subtask_id": "int"
+#         },
+#         "function": project_manager.read_subtask
+#     },
+#     "update_subtask": {
+#         "description": "Updates an existing subtask identified by user_story_id and subtask_id.",
+#         "args": {
+#             "user_story_id": "int",
+#             "subtask_id": "int",
+#             "subtask": "str"
+#         },
+#         "function": project_manager.update_subtask
+#     },
+#     "delete_subtask": {
+#         "description": "Deletes a subtask identified by user_story_id and subtask_id.",
+#         "args": {
+#             "user_story_id": "int",
+#             "subtask_id": "int"
+#         },
+#         "function": project_manager.delete_subtask
+#     }
+# }
 
 
 
@@ -130,25 +134,28 @@ def main():
     if not os.path.exists(log_dir):
         os.mkdir(log_dir)
 
-    developer = core.Agent('llama3.1:70b-instruct-q4_K_M',
+    model_name = 'llama3.1:8b-instruct-q8_0'
+    model_endpoint = "http://127.0.0.1:11434/api/generate"
+
+    developer = core.Agent(model_name,
                            'Developer',
                            developer_system_message,
-                           model_endpoint="http://127.0.0.1:11434/api/generate")
-    scrum_master = core.Agent('llama3.1:70b-instruct-q4_K_M',
+                           model_endpoint=model_endpoint)
+    scrum_master = core.Agent(model_name,
                               'Scrum Master',
                               scrum_master_system_message,
-                              model_endpoint="http://127.0.0.1:11434/api/generate",
-                              tools=scrum_master_tools)
-    product_owner = core.Agent('llama3.1:70b-instruct-q4_K_M',
+                              model_endpoint=model_endpoint,
+                              tools=scrum_master_tools.tool_descriptions())
+    product_owner = core.Agent(model_name,
                                'Product Owner',
                                product_owner_system_message,
-                               model_endpoint="http://127.0.0.1:11434/api/generate")
+                               model_endpoint=model_endpoint)
     for agent in [developer, scrum_master]:
         agent.add_observed_message('product_owner', sprint_planning_system_message)
     rounds = 0
     while rounds < 3:
         for agent in [developer, scrum_master, product_owner]:
-            if agent.should_respond():
+            if agent.retain_floor():
                 response = agent.generate_response()
                 for other_agent in [developer, scrum_master, product_owner]:
                     if other_agent != agent:

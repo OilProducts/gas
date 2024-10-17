@@ -150,7 +150,7 @@ def process_agent_responses():
             continue  # Skip human participants
         role = agent.role
         # Determine if the agent should respond
-        should_respond, thought_process = agent.should_respond(context)
+        should_respond, thought_process = agent.retain_floor(context)
         if should_respond:
             # Generate response
             response = agent.generate_response(context)
