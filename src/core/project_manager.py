@@ -185,7 +185,7 @@ class ScrumMasterTools:
     def tool_descriptions(self) -> List[Dict[str, Any]]:
         """Generates a list of tool descriptions in the required JSON format."""
         tools = []
-        methods = inspect.getmembers(self, predicate=inspect.isfunction)
+        methods = inspect.getmembers(self, predicate=inspect.ismethod)
         for name, method in methods:
             if name.startswith('_') or name in ['load_user_stories', 'save_user_stories',
                                                 'tool_descriptions']:

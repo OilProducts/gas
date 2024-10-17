@@ -12,6 +12,7 @@ class Agent:
                  model_name=None,
                  role="Unconfigured Agent",
                  system_message="",
+                 additional_context="",
                  is_human=False,
                  model_endpoint="http://127.0.0.1:11434/api/generate",
                  tools=None,
@@ -20,6 +21,7 @@ class Agent:
         self.model_endpoint = model_endpoint
         self.role = role
         self.system_message = system_message
+        self.additional_context = additional_context
         self.is_human = is_human
         self.tools = tools or {}
         self.log = logging.getLogger(role)
@@ -27,9 +29,12 @@ class Agent:
         self.prompt_manager = PromptManager(
             role=self.role,
             system_content=self.system_message,
-            tools=self.tools
+            additional_context=additional_context,
+            tools=self.tools,
         )
         self.log_file = f"{log_dir}/{role}.json"
+        self.add_observed_message('system', self.prompt_manager.system_prompt)
+
 
     def execute_tool(self, tool_call):
         """
@@ -102,7 +107,8 @@ class Agent:
         # Add decision-making instruction
         decision_instruction = (
             f"Considering the above conversation, should I, as the {self.role}, take action ("
-            f"either a response, or call a tool, etc.) or provide a decision at this point? "
+            f"respond to another participant, ask a question, or call a tool, etc.) or provide a "
+            f"decision at this point? "
             "Provide a short summary of your reasoning and conclude with 'Decision: Yes' or 'Decision: No'."
         )
         prompt += decision_instruction
@@ -122,7 +128,7 @@ class Agent:
         print(f"{self.role} decision: {decision}")
         return decision == 'yes', response_text
     
-    def take_turn(self, context):
+    def take_turn(self):
         """
         Takes a single turn, which may be multiple rounds of thought and response generation.
         """
@@ -131,10 +137,10 @@ class Agent:
             if retain:
                 response = self.generate_response()
                 self.add_observed_message(f'{self.role}', response)
-                return response
+                return retain, response
             else:
                 # Add the thought process to the conversation history
-                self.add_observed_message(f'{self.role}', thought_process)
+                return retain, None
 
     def generate_response(self):
         """
@@ -160,11 +166,11 @@ class Agent:
                 acknowledgments.append(acknowledgment)
             # Optionally, you can add a combined acknowledgment message
             combined_acknowledgment = "\n".join(acknowledgments)
-            self.add_observed_message(f'{self.role}', combined_acknowledgment)
+            # self.add_observed_message(f'{self.role}', combined_acknowledgment)
             return combined_acknowledgment
         else:
             # Add the assistant's response to the conversation history
-            self.add_observed_message(f'{self.role}', response_text)
+            # self.add_observed_message(f'{self.role}', response_text)
             return response_text
 
     def prompt_model(self, prompt):
@@ -181,6 +187,7 @@ class Agent:
             },
             "stream": False
         }
+        print(prompt)
         try:
             response = requests.post(self.model_endpoint, json=payload)
             response.raise_for_status()

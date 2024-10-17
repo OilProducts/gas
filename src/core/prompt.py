@@ -1,8 +1,9 @@
 class PromptManager:
-    def __init__(self, role, system_content, tools=None):
+    def __init__(self, role, system_content, additional_context, tools=None):
         self.role = role  # Role of the agent, e.g., 'Scrum Master', 'Developer'
         self.system_content = system_content  # System prompt content
-        self.tools = tools or {}  # List of tools available to the agent
+        self.additional_context = additional_context  # Additional context for the agent
+        self.tools = tools or []  # List of tool definitions
         self.special_tokens = {
             "begin_of_text": "<|begin_of_text|>",
             "end_of_text": "<|end_of_text|>",
@@ -17,31 +18,34 @@ class PromptManager:
         # Initialize the prompt with the system prompt
         self._initialize_system_prompt()
 
+
     def _initialize_system_prompt(self):
         # Construct the system prompt with environment and tools
         if self.tools:
-            tools_descriptions = ""
-            for tool_name, tool in self.tools.items():
-                args = ", ".join(f"{arg}: {type_}" for arg, type_ in tool["args"].items())
-                tools_descriptions += f"\n- {tool_name}({args}): {tool['description']}"
+            # tools_descriptions = ""
+            # for tool_name, tool in self.tools.items():
+            #     args = ", ".join(f"{arg}: {type_}" for arg, type_ in tool["args"].items())
+            #     tools_descriptions += f"\n- {tool_name}({args}): {tool['description']}"
             tool_usage_instructions = (
                 "You have access to the following tools, which you can use by outputting a JSON object in the following format:\n"
                 '{"tool": "tool_name", "args": {"arg1": "value1", "arg2": "value2", ...}}\n'
                 "Replace 'tool_name' with the name of the tool, and provide the necessary arguments.\n"
                 "Available tools are:"
-                f"{tools_descriptions}"
+                f"{self.tools}"
             )
         else:
             tool_usage_instructions = ""
         system_prompt = (
             f"Environment: ipython\n"
-            f"{tool_usage_instructions}\n"
             f"Cutting Knowledge Date: December 2023\n"
             f"Today Date: 23 July 2024\n\n"
             f"You are the {self.role}.\n\n"
-            f"{self.system_content}"
+            f"{self.system_content}\n\n"
+            f"{self.additional_context}\n"
+            f"{tool_usage_instructions}\n"
         )
         self.add_observed_message("system", system_prompt)
+        self.system_prompt = system_prompt
 
     def add_observed_message(self, role, content):
         message = {
